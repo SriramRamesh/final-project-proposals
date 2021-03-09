@@ -65,6 +65,83 @@ small. We will use large circuits to demonstrate that our approach makes some
 computations feasible, while we will use small circuits (which can be run on
 both a single instance and distributed) to measure the performance overhead.
 
+Examples:
+
+Big data, large-scale parallel and high-performance computing applications are been deployed
+at higher rates than ever. With burst of such use cases, heterogenous cloud deployment should not
+be a bottleneck affecting fast deployments in various public clouds.
+
+We narrow down to a use case of batch jobs, a capability provided by all public clouds, or atleast the ones in 
+the scope of our discussion.
+
+Usually, batch jobs require spinning up of cluster of workers, followed by jobs submitted to
+these workers. When we look at the implementations of this API across all the cloud platforms,
+the underlying principle remains constant. 
+
+Let's consider a particular case, integration of batch job APIs with Java. Each cloud provider has it's
+own library which implements the required functionalities along with dependencies required (For example: Maven).
+When the library is used, same flow is being executed across all clouds.
+
+Ex:
+
+Azure
+
+The code snipped looks like.
+
+```
+// create the batch client for an account using its URI and keys
+BatchClient client = BatchClient.open(new BatchSharedKeyCredentials("https://API.eastus.batch.azure.com", "user", batchKey));
+
+// configure a pool of VMs to use 
+VirtualMachineConfiguration configuration = new VirtualMachineConfiguration();
+configuration.withNodeAgentSKUId("batch.node.ubuntu 16.04");
+client.poolOperations().createPool(poolId, poolVMSize, configuration, poolVMCount);
+```
+
+While a dependicy is being added to pom.xml file.
+
+```
+<dependency>
+    <groupId>com.microsoft.azure</groupId>
+    <artifactId>azure-batch</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+Similarly, when we look at AWS.
+
+```
+public class BatchClient {
+public static void main(String[] args) {
+        AWSBatch client = AWSBatchClientBuilder.standard().withRegion("us-east-1").build();
+SubmitJobRequest request = new SubmitJobRequest().withJobName("example").withJobQueue("new-queue").withJobDefinition("sleep30:4");
+SubmitJobResult response = client.submitJob(request);
+System.out.println(response);    
+}
+}
+```
+
+While a dependicy is being added to pom.xml file.
+
+```
+ <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-batch -->
+    <dependencies>
+    <dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-batch</artifactId>
+    <version>1.11.470</version>
+</dependency>
+    </dependencies>
+```
+
+When we look closely, if such regions are indentified in the code which execute the same common end goal
+across the cloud platforms, we could come up with ways to suggest snippets for the targeted cloud. Thus providing the 
+same functionality with minimal development overhead.
+
+There are many features across the cloud providers which at core deliver the same functionalities. For the sake of discussion, 
+we explore limited examples. The use cases can extended across features and languages used.
+
+
 # Timeline
 > You should lay out a plan for what you hope to have done by each checkin. Note
 > we understand that sometimes unexpected bugs or other problems lead to slip
